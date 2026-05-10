@@ -1,0 +1,298 @@
+# Embodied-Aki Training Configuration
+# For top-tier conference submission (ICLR/ICML/CoRL)
+
+# Model Configuration
+model:
+  # VLA Backbone settings
+  vla_backbone:
+    model_name: "Qwen/Qwen2.5-VL-7B-Instruct"
+    action_dim: 14
+    action_chunk_size: 8
+    freeze_vision_encoder: false
+    freeze_llm: false
+    use_lora: true
+    lora_rank: 64
+  
+  # World Model settings
+  world_model:
+    rssm_deterministic_dim: 512
+    rssm_stochastic_dim: 30
+    rssm_num_categories: 32
+    kl_weight: 0.5
+  
+  # Policy Head settings
+  policy_head:
+    type: "diffusion"  # Options: "diffusion" or "act"
+    num_diffusion_steps: 100
+    noise_schedule: "cosine"
+  
+  # Planner settings
+  planner:
+    model_name: "Qwen/Qwen2.5-7B-Instruct"
+    enable_thinking: true
+    enable_self_correction: true
+  
+  # Reviewer settings
+  reviewer:
+    enabled: true
+    safety_threshold: 0.8
+    feasibility_threshold: 0.6
+
+# Training Configuration
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  warmup_steps: 1000
+  grad_clip: 1.0
+  use_mixed_precision: true
+  
+  # Optimizer settings
+  optimizer: "adamw"
+  beta1: 0.9
+  beta2: 0.999
+  
+  # Learning rate scheduler
+  scheduler: "linear_with_warmup"
+  
+  # Checkpoint settings
+  save_every: 10
+  keep_last_n: 5
+
+# Data Configuration
+data:
+  data_dir: "/path/to/datasets"
+  dataset_name: "g1_stack_block"
+  image_size: 224
+  image_channels: 3
+  proprio_dim: 10
+  
+  # Data loading
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true
+  
+  # Data augmentation
+  augmentations:
+    random_crop: true
+    color_jitter: true
+    random_flip: false  # Not suitable for robot actions
+  
+  # Dataset mixture (for multi-dataset training)
+  mixtures:
+    - name: "unitree_g1_all"
+      datasets:
+        - "g1_stack_block"
+        - "g1_bag_insert"
+        - "g1_erase_board"
+        - "g1_clean_table"
+      sampling_weights: [1.0, 1.0, 1.0, 1.0]
+
+# Evaluation Configuration
+evaluation:
+  val_split: 0.1
+  eval_every: 1
+  metrics:
+    - "mse_loss"
+    - "success_rate"
+    - "action_smoothness"
+  
+  # Benchmark evaluation
+  benchmarks:
+    - name: "LIBERO-Spatial"
+      enabled: true
+    - name: "LIBERO-Object"
+      enabled: true
+    - name: "CALVIN"
+      enabled: false
+
+# Logging Configuration
+logging:
+  output_dir: "./outputs"
+  log_every: 100
+  wandb_enabled: true
+  wandb_project: "embodied-aki"
+  wandb_entity: "your-entity"
+  
+  # TensorBoard
+  tensorboard_enabled: true
+  tensorboard_log_dir: "./logs"
+
+# Distributed Training
+distributed:
+  strategy: "ddp"  # Options: "ddp", "deepspeed", "fsdp"
+  num_nodes: 1
+  num_gpus_per_node: 8
+  
+  # DeepSpeed configuration
+  deepspeed:
+    enabled: false
+    stage: 2  # ZeRO-2
+    offload_optimizer: false
+    gradient_accumulation_steps: 1
+
+# Reproducibility
+random_seed: 42
+deterministic: true
+
+# Advanced Settings
+advanced:
+  # Gradient checkpointing for memory efficiency
+  gradient_checkpointing: true
+  
+  # Compile model with torch.compile (PyTorch 2.0+)
+  compile_model: false
+  
+  # Flash Attention
+  use_flash_attention: true
+  
+  # Multi-modal fusion
+  fusion_type: "cross_attention"  # Options: "concat", "cross_attention", "film"
+  
+  # Action normalization
+  action_normalization: "robust"  # Options: "standard", "robust", "min_max"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
